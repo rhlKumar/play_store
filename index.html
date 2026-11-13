@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Play Pulse India — Google Play Early Success Finder</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-top-row">
+      <div class="brand-and-tabs">
+        <div class="brand-group">
+          <div class="brand-icon" aria-hidden="true">▶</div>
+          <h1 class="brand-title">Play Pulse</h1>
+          <div class="country-switch" role="group" aria-label="Select Store Country" id="countrySwitchGroup">
+            <button type="button" class="country-btn" data-country="IN" aria-pressed="true" title="Google Play India Store (gl=IN)">
+              🇮🇳 India
+            </button>
+            <button type="button" class="country-btn" data-country="US" aria-pressed="false" title="Google Play USA Store (gl=US)">
+              🇺🇸 USA
+            </button>
+          </div>
+        </div>
+
+        <nav class="tabs-nav-bar" role="tablist" aria-label="Dashboard Views">
+          <button type="button" role="tab" class="main-tab-btn" id="tabBtn-all" data-tab="all" aria-selected="false" aria-controls="panel-all">
+            <span>All Apps</span>
+            <span class="tab-count-badge" id="badgeCount-all">0</span>
+          </button>
+          <button type="button" role="tab" class="main-tab-btn" id="tabBtn-yesterday" data-tab="yesterday" aria-selected="false" aria-controls="panel-compare">
+            <span>vs Yesterday</span>
+            <span class="tab-count-badge" id="badgeCount-yesterday">0</span>
+          </button>
+          <button type="button" role="tab" class="main-tab-btn" id="tabBtn-week" data-tab="week" aria-selected="false" aria-controls="panel-compare">
+            <span>vs Last Week</span>
+            <span class="tab-count-badge" id="badgeCount-week">0</span>
+          </button>
+          <button type="button" role="tab" class="main-tab-btn" id="tabBtn-month" data-tab="month" aria-selected="true" aria-controls="panel-compare">
+            <span>vs Last Month</span>
+            <span class="tab-count-badge" id="badgeCount-month">0</span>
+          </button>
+        </nav>
+      </div>
+
+      <div class="header-meta">
+        <span class="meta-pill" title="Latest Crawl Run ID">
+          Crawl: <strong id="metaLatestRun">—</strong>
+        </span>
+        <span class="meta-pill" title="Total Unique Ranked Apps">
+          Apps: <strong id="metaUniqueApps">—</strong>
+        </span>
+        <span class="meta-pill" title="Total Stored Runs in Database">
+          Runs: <strong id="metaRunsCount">—</strong>
+        </span>
+        <span class="meta-pill" title="Site Generation Timestamp" id="metaGeneratedPill">
+          <strong id="metaGeneratedAt">—</strong>
+        </span>
+        <button type="button" id="themeToggleBtn" class="theme-btn" aria-label="Toggle color theme">
+          ☀️ Light
+        </button>
+      </div>
+    </div>
+
+    <!-- Universal Multi-Select Filters (applies across All 4 Tabs) -->
+    <div class="universal-filter-bar" role="region" aria-label="Universal Multi-Select Filters">
+      <div class="universal-filter-inner">
+        <div class="u-filter-group" role="group" aria-label="Filter by Segment (Multi-select)" id="globalVerticalGroup">
+          <span class="u-filter-label">Segment:</span>
+          <button type="button" class="multi-chip" data-u-vert="apps" aria-pressed="true">
+            <span class="chip-check">✓</span>
+            <span>📱 Apps</span>
+            <span class="chip-count" id="uCountVert-apps">0</span>
+          </button>
+          <button type="button" class="multi-chip" data-u-vert="games" aria-pressed="false">
+            <span class="chip-check">✓</span>
+            <span>🎮 Games</span>
+            <span class="chip-count" id="uCountVert-games">0</span>
+          </button>
+          <button type="button" class="multi-chip" data-u-vert="education" aria-pressed="false">
+            <span class="chip-check">✓</span>
+            <span>🎓 Education</span>
+            <span class="chip-count" id="uCountVert-education">0</span>
+          </button>
+        </div>
+
+        <div class="u-divider" aria-hidden="true"></div>
+
+        <div class="u-filter-group" role="group" aria-label="Filter by Monetization (Multi-select)" id="globalMonetizationGroup">
+          <span class="u-filter-label">Monetization:</span>
+          <button type="button" class="multi-chip" data-u-mon="iap" aria-pressed="false">
+            <span class="chip-check">✓</span>
+            <span>💎 IAP</span>
+            <span class="chip-count" id="uCountMon-iap">0</span>
+          </button>
+          <button type="button" class="multi-chip" data-u-mon="ads" aria-pressed="false">
+            <span class="chip-check">✓</span>
+            <span>📢 Ads</span>
+            <span class="chip-count" id="uCountMon-ads">0</span>
+          </button>
+          <button type="button" class="multi-chip" data-u-mon="none" aria-pressed="true">
+            <span class="chip-check">✓</span>
+            <span>✨ None</span>
+            <span class="chip-count" id="uCountMon-none">0</span>
+          </button>
+        </div>
+
+        <div id="allKpiGrid" class="pill-group" style="margin-inline-start:0.25rem;"></div>
+
+        <button type="button" id="globalResetBtn" class="action-btn" style="margin-inline-start:auto;" hidden>
+          ↺ Reset Defaults
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- ==================== PANEL 1: ALL APPS TAB ==================== -->
+    <section id="panel-all" role="tabpanel" aria-labelledby="tabBtn-all" hidden>
+      <div class="section-card">
+        <div class="compact-toolbar">
+          <div class="toolbar-group" id="allQuickTierPills" aria-label="Quick Download Tier Filters">
+            <button type="button" class="filter-pill" data-tier="ALL" aria-pressed="true">All Tiers</button>
+            <button type="button" class="filter-pill" data-tier="TARGET_4" aria-pressed="false">🔥 50K–10L</button>
+            <button type="button" class="filter-pill" data-tier="UNDER_50K" aria-pressed="false">&lt;50K</button>
+            <button type="button" class="filter-pill" data-tier="50000" aria-pressed="false">50K+</button>
+            <button type="button" class="filter-pill" data-tier="100000" aria-pressed="false">1L+</button>
+            <button type="button" class="filter-pill" data-tier="500000" aria-pressed="false">5L+</button>
+            <button type="button" class="filter-pill" data-tier="1000000" aria-pressed="false">10L+</button>
+            <button type="button" class="filter-pill" data-tier="5000000" aria-pressed="false">50L+</button>
+            <button type="button" class="filter-pill" data-tier="10000000_PLUS" aria-pressed="false">1Cr+</button>
+          </div>
+
+          <div class="toolbar-group" style="margin-inline-start:auto;">
+            <input type="search" id="allSearchInput" class="filter-input search-input" placeholder="Search title, pkg, dev [/]...">
+
+            <select id="allCategorySelect" class="filter-select" aria-label="Category">
+              <option value="ALL">All 60 Categories</option>
+            </select>
+
+            <select id="allTierSelect" class="filter-select" aria-label="Downloads Tier">
+              <option value="ALL">All Tiers</option>
+              <option value="EARLY_ALL">≤ 10L Combined</option>
+              <option value="TARGET_4">50K–10L Target</option>
+              <option value="UNDER_50K">&lt; 50K</option>
+              <option value="50000">50K+</option>
+              <option value="100000">1L+</option>
+              <option value="500000">5L+</option>
+              <option value="1000000">10L+</option>
+              <option value="5000000">50L+</option>
+              <option value="10000000_PLUS">1Cr+</option>
+            </select>
+
+            <select id="allAgeSelect" class="filter-select" aria-label="Release Age">
+              <option value="ALL">Any Age</option>
+              <option value="30">≤ 30d old</option>
+              <option value="60">≤ 60d old</option>
+              <option value="90">≤ 90d old</option>
+              <option value="180">≤ 6m old</option>
+              <option value="365">≤ 1y old</option>
+            </select>
+
+            <select id="allRatingSelect" class="filter-select" aria-label="Minimum Rating">
+              <option value="ALL">Any ★</option>
+              <option value="4.5">≥ 4.5 ★</option>
+              <option value="4.0">≥ 4.0 ★</option>
+              <option value="3.5">≥ 3.5 ★</option>
+              <option value="LOW">&lt; 3.5 ★</option>
+            </select>
+
+            <button type="button" id="allResetFiltersBtn" class="action-btn">Reset</button>
+            <button type="button" id="allExportCsvBtn" class="action-btn">⬇ CSV</button>
+          </div>
+        </div>
+
+        <!-- Responsive Table (modern-web-guidance: responsive-table) -->
+        <div tabindex="0" role="region" aria-labelledby="allTableCaption" class="table-wrapper">
+          <table class="data-table" id="allAppsTable" style="--label-2:'Rank';--label-3:'Category';--label-4:'Tier';--label-5:'Exact Installs';--label-6:'Installs/Day';--label-7:'Rating';--label-8:'Ratings / Reviews';--label-9:'Released';--label-10:'Updated';--label-11:'Monetization & Dev';">
+            <caption id="allTableCaption">All latest ranked Google Play apps with sortable metadata</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="sortable" data-sort="t">App / Package</th>
+                <th scope="col" class="sortable" data-sort="br">Rank</th>
+                <th scope="col" class="sortable" data-sort="cl">Category</th>
+                <th scope="col" class="sortable" data-sort="im">Tier</th>
+                <th scope="col" class="sortable" data-sort="ie">Exact Installs</th>
+                <th scope="col" class="sortable" data-sort="vel" aria-sort="descending">Velocity / Day ▼</th>
+                <th scope="col" class="sortable" data-sort="rt">Rating</th>
+                <th scope="col" class="sortable" data-sort="rc">Ratings &amp; Reviews</th>
+                <th scope="col" class="sortable" data-sort="ro">Released On</th>
+                <th scope="col" class="sortable" data-sort="uo">Updated On</th>
+                <th scope="col" class="sortable" data-sort="d">Monetization &amp; Dev</th>
+              </tr>
+            </thead>
+            <tbody id="allAppsTbody"></tbody>
+          </table>
+        </div>
+
+        <div class="pagination-bar">
+          <div id="allPaginationSummary">Showing 0–0 of 0 apps</div>
+          <div class="pagination-controls">
+            <label for="allPageSizeSelect">Rows:</label>
+            <select id="allPageSizeSelect" class="filter-select">
+              <option value="50">50</option>
+              <option value="100" selected>100</option>
+              <option value="250">250</option>
+              <option value="500">500</option>
+            </select>
+            <button type="button" id="allPrevPageBtn" class="action-btn">← Prev</button>
+            <span id="allPageIndicator" class="mono-num">1 / 1</span>
+            <button type="button" id="allNextPageBtn" class="action-btn">Next →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== PANEL 2: COMPARISON TABS (YESTERDAY / WEEK / MONTH) ==================== -->
+    <section id="panel-compare" role="tabpanel">
+      <!-- SECTION A: NEW APPS IN 50K, 1L, 5L, 10L DOWNLOAD CATEGORIES -->
+      <div class="section-card">
+        <div class="compact-toolbar">
+          <!-- Compact Tier Pills (All 50K-10L, 50K, 1L, 5L, 10L) -->
+          <div class="toolbar-group" id="breakoutTierCards" aria-label="Download Bucket Filter"></div>
+
+          <div class="toolbar-group" id="breakoutModePills">
+            <button type="button" class="filter-pill" data-bmode="ALL" aria-pressed="true">All</button>
+            <button type="button" class="filter-pill" data-bmode="NEW_CHART" aria-pressed="false">🆕 New Chart</button>
+            <button type="button" class="filter-pill" data-bmode="TIER_UP" aria-pressed="false">🚀 Tier Up</button>
+          </div>
+
+          <div class="toolbar-group" style="margin-inline-start:auto;">
+            <span id="compBannerTitle" style="display:none;"></span>
+            <span id="compBannerSub" style="display:none;"></span>
+
+            <select id="compBaselineSelect" class="filter-select" title="Baseline Snapshot Date" aria-label="Baseline Snapshot"></select>
+
+            <select id="compGlobalCatSelect" class="filter-select" aria-label="Category Scope">
+              <option value="ALL">All 60 Categories</option>
+            </select>
+
+            <select id="breakoutAgeSelect" class="filter-select" aria-label="Release Age">
+              <option value="ALL">Any Age</option>
+              <option value="30">≤ 30d old</option>
+              <option value="90">≤ 90d old</option>
+              <option value="180">≤ 6m old</option>
+              <option value="365">≤ 1y old</option>
+            </select>
+
+            <input type="search" id="compGlobalSearchInput" class="filter-input search-input" placeholder="Search comparison [/]...">
+
+            <button type="button" id="breakoutExportCsvBtn" class="action-btn">⬇ CSV</button>
+          </div>
+        </div>
+
+        <div tabindex="0" role="region" aria-labelledby="breakoutTableCaption" class="table-wrapper">
+          <table class="data-table" id="breakoutTable" style="--label-2:'Breakout Status';--label-3:'Rank & Move';--label-4:'Category';--label-5:'Install Tier';--label-6:'Exact Installs & Δ';--label-7:'Velocity / Day';--label-8:'Rating & Δ';--label-9:'Released On';--label-10:'Monetization & Dev';">
+            <caption id="breakoutTableCaption">New and tier-graduated apps in 50K, 1L, 5L, and 10L download buckets</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="sortable" data-bsort="t">App / Package</th>
+                <th scope="col" class="sortable" data-bsort="status">Breakout Type</th>
+                <th scope="col" class="sortable" data-bsort="curr_rank">Rank &amp; Move</th>
+                <th scope="col" class="sortable" data-bsort="cl">Category</th>
+                <th scope="col" class="sortable" data-bsort="im">Download Bucket</th>
+                <th scope="col" class="sortable" data-bsort="ie">Exact Installs &amp; Δ</th>
+                <th scope="col" class="sortable" data-bsort="vel" aria-sort="descending">Velocity / Day ▼</th>
+                <th scope="col" class="sortable" data-bsort="rt">Rating &amp; Reviews</th>
+                <th scope="col" class="sortable" data-bsort="ro">Released On</th>
+                <th scope="col" class="sortable" data-bsort="d">Monetization &amp; Dev</th>
+              </tr>
+            </thead>
+            <tbody id="breakoutTbody"></tbody>
+          </table>
+        </div>
+
+        <div class="pagination-bar">
+          <div id="breakoutPaginationSummary">Showing 0–0 of 0 breakout apps</div>
+          <div class="pagination-controls">
+            <button type="button" id="breakoutPrevPageBtn" class="action-btn">← Prev</button>
+            <span id="breakoutPageIndicator" class="mono-num">1 / 1</span>
+            <button type="button" id="breakoutNextPageBtn" class="action-btn">Next →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION B: COMBINED RANK MOVEMENT LIST (LAST TWO DURATIONS — RANK GAINED / LOST) -->
+      <div class="section-card deferred-below-fold" style="margin-block-start: 0.6rem;">
+        <div class="compact-toolbar">
+          <div class="toolbar-group" id="movementTypePills">
+            <span class="section-badge-title">📊 Combined Rank Movement:</span>
+            <button type="button" class="filter-pill" data-mmode="ALL" aria-pressed="true">All (<span id="mCountAll">0</span>)</button>
+            <button type="button" class="filter-pill" data-mmode="GAINED" aria-pressed="false">▲ Gained (<span id="mCountGained">0</span>)</button>
+            <button type="button" class="filter-pill" data-mmode="SURGE" aria-pressed="false">🔥 +15 Surge (<span id="mCountSurge">0</span>)</button>
+            <button type="button" class="filter-pill" data-mmode="LOST" aria-pressed="false">▼ Lost (<span id="mCountLost">0</span>)</button>
+            <button type="button" class="filter-pill" data-mmode="NEW" aria-pressed="false">🆕 New (<span id="mCountNew">0</span>)</button>
+            <button type="button" class="filter-pill" data-mmode="DROPPED" aria-pressed="false">🔻 Dropped (<span id="mCountDropped">0</span>)</button>
+            <button type="button" class="filter-pill" data-mmode="SAME" aria-pressed="false">— Same (<span id="mCountSame">0</span>)</button>
+          </div>
+
+          <div class="toolbar-group" style="margin-inline-start:auto;">
+            <select id="movementTierSelect" class="filter-select" aria-label="Downloads Filter">
+              <option value="ALL">All Tiers</option>
+              <option value="TARGET_4">🎯 50K–10L Only</option>
+              <option value="EARLY_ALL">🌱 ≤ 10L Early Stage</option>
+              <option value="50000">50K+</option>
+              <option value="100000">1L+</option>
+              <option value="500000">5L+</option>
+              <option value="1000000">10L+</option>
+              <option value="UNDER_50K">&lt; 50K</option>
+              <option value="5000000_PLUS">50L+ &amp; 1Cr+</option>
+            </select>
+
+            <button type="button" id="movementExportCsvBtn" class="action-btn">⬇ CSV</button>
+          </div>
+        </div>
+
+        <div tabindex="0" role="region" aria-labelledby="movementTableCaption" class="table-wrapper">
+          <table class="data-table" id="movementTable" style="--label-2:'Rank Change';--label-3:'Prev → Curr Rank';--label-4:'Category';--label-5:'Install Tier';--label-6:'Exact Installs & Δ';--label-7:'Velocity / Day';--label-8:'Rating & Reviews';--label-9:'Released On';">
+            <caption id="movementTableCaption">Combined rank changes between current run and baseline run</caption>
+            <thead>
+              <tr>
+                <th scope="col" class="sortable" data-msort="t">App / Package</th>
+                <th scope="col" class="sortable" data-msort="delta">Rank Δ (Gained/Lost)</th>
+                <th scope="col" class="sortable" data-msort="curr_rank">Prev → Curr Rank</th>
+                <th scope="col" class="sortable" data-msort="cl">Category</th>
+                <th scope="col" class="sortable" data-msort="im">Install Tier</th>
+                <th scope="col" class="sortable" data-msort="ie">Exact Installs &amp; Δ</th>
+                <th scope="col" class="sortable" data-msort="vel" aria-sort="descending">Velocity / Day ▼</th>
+                <th scope="col" class="sortable" data-msort="rt">Rating &amp; Reviews</th>
+                <th scope="col" class="sortable" data-msort="ro">Released On</th>
+              </tr>
+            </thead>
+            <tbody id="movementTbody"></tbody>
+          </table>
+        </div>
+
+        <div class="pagination-bar">
+          <div id="movementPaginationSummary">Showing 0–0 of 0 apps</div>
+          <div class="pagination-controls">
+            <label for="movementPageSizeSelect">Rows:</label>
+            <select id="movementPageSizeSelect" class="filter-select">
+              <option value="50">50</option>
+              <option value="100" selected>100</option>
+              <option value="250">250</option>
+              <option value="500">500</option>
+            </select>
+            <button type="button" id="movementPrevPageBtn" class="action-btn">← Prev</button>
+            <span id="movementPageIndicator" class="mono-num">1 / 1</span>
+            <button type="button" id="movementNextPageBtn" class="action-btn">Next →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- App Detail Modal (modern-web-guidance: light-dismiss-a-dialog) -->
+  <dialog id="appDetailDialog" closedby="any" aria-labelledby="dialogAppTitle">
+    <div class="dialog-header">
+      <div class="dialog-app-head">
+        <img id="dialogAppIcon" class="dialog-app-icon" src="" alt="" loading="lazy">
+        <div>
+          <h2 id="dialogAppTitle" style="margin:0;font-size:1.1rem;">App Title</h2>
+          <div id="dialogAppDev" style="color:var(--text-secondary);font-size:0.8rem;margin-block-start:0.1rem;"></div>
+          <div id="dialogAppLinks" class="pill-group" style="margin-block-start:0.35rem;"></div>
+        </div>
+      </div>
+      <form method="dialog">
+        <button type="submit" class="action-btn" aria-label="Close app details modal">✕ Close</button>
+      </form>
+    </div>
+    <div class="dialog-body" id="dialogBodyContent"></div>
+  </dialog>
+
+  <!-- Developer Portfolio Modal (modern-web-guidance: light-dismiss-a-dialog) -->
+  <dialog id="devDetailDialog" closedby="any" aria-labelledby="devDialogTitle">
+    <div class="dialog-header">
+      <div>
+        <h2 id="devDialogTitle" style="margin:0;font-size:1.1rem;">Developer Portfolio</h2>
+        <div id="devDialogMeta" class="pill-group" style="margin-block-start:0.4rem;"></div>
+      </div>
+      <div class="pill-group">
+        <button type="button" id="devExportCsvBtn" class="action-btn">⬇ Export CSV</button>
+        <form method="dialog" style="margin:0;">
+          <button type="submit" class="action-btn" aria-label="Close developer portfolio modal">✕ Close</button>
+        </form>
+      </div>
+    </div>
+    <div class="dialog-body" style="padding:0.75rem 1rem;">
+      <div tabindex="0" role="region" aria-labelledby="devTableCaption" class="table-wrapper" style="max-block-size:calc(90vh - 120px);">
+        <table class="data-table" id="devAppsTable" style="--label-2:'Best Rank & Charts';--label-3:'Category & Segment';--label-4:'Install Tier';--label-5:'Exact Installs';--label-6:'Velocity / Day';--label-7:'Rating';--label-8:'Ratings / Reviews / 1★-5★';--label-9:'Released On';--label-10:'Updated On';--label-11:'Monetization & Contact';">
+          <caption id="devTableCaption">All apps by selected developer with complete metadata</caption>
+          <thead>
+            <tr>
+              <th scope="col" class="sortable" data-dsort="t">App / Package / Description</th>
+              <th scope="col" class="sortable" data-dsort="br">Best Rank &amp; Charts</th>
+              <th scope="col" class="sortable" data-dsort="cl">Category &amp; Segment</th>
+              <th scope="col" class="sortable" data-dsort="im">Install Tier</th>
+              <th scope="col" class="sortable" data-dsort="ie">Exact Installs</th>
+              <th scope="col" class="sortable" data-dsort="vel" aria-sort="descending">Velocity / Day ▼</th>
+              <th scope="col" class="sortable" data-dsort="rt">Rating</th>
+              <th scope="col" class="sortable" data-dsort="rc">Ratings / Reviews / Histogram</th>
+              <th scope="col" class="sortable" data-dsort="ro">Released On &amp; Age</th>
+              <th scope="col" class="sortable" data-dsort="uo">Updated On</th>
+              <th scope="col" class="sortable" data-dsort="iap">Monetization &amp; Contact</th>
+            </tr>
+          </thead>
+          <tbody id="devAppsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="data/payload.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
